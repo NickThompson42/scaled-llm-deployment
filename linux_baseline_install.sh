@@ -48,4 +48,18 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
+# Clone the repository
+echo "Cloning the h2ogpt_rg repository..."
+git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git
+
+# Navigate into the repository directory
+cd h2ogpt_rg
+
 echo "Installation complete. Please log out and log back in to apply the changes."
+
+# Optional: Reboot the system
+read -p "Do you want to reboot now? (y/n) " -n 1 -r
+if [[ $REPLY =~ ^[Yy]$ ]]
+then
+   sudo reboot
+fi
