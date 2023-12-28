@@ -84,6 +84,17 @@ function docker_startup(){
 }
 EOF
 
+function baseline(){
+   # source the needed functions
+   source ~/.bashrc_functions
+   # change dir to h2ogpt_rg
+   cd $HOME/h2ogpt_rg
+   ls
+   echo "Verify the files exist in h2ogpt_rg"
+   sleep 3
+   clear
+}
+
 # Source the ~/.bashrc_functions in the user's .bashrc if it's not already
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
     echo "Sourcing $USER_HOME/.bashrc_functions in $USER_HOME/.bashrc..."
@@ -91,9 +102,13 @@ if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
 fi
 
-echo -e "Installation complete."
-echo -e "After reboot, run 'docker_startup' to initialize the docker container for the LLM."
-echo -e "Please log out and log back in to apply the changes."
+echo -e ">> Installation complete."
+echo -e " "
+echo -e ">>> After reboot, use command 'baseline'."
+echo -e " "
+echo -e ">>>> After reboot, run 'docker_startup' to initialize the docker container for the LLM."
+echo -e " "
+echo -e ">>>>> Please log out and log back in to apply the changes."
 
 # Optional: Reboot the system
 read -p "Do you want to reboot now? (y/n) " -n 1 -r
