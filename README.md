@@ -8,7 +8,9 @@ This repo provides the scripts and files necessary to scale a LLM quickly. The p
 
 ```bash
 wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main/shell-scripts/startup.sh -O startup.sh
+
 sudo chmod +x startup.sh
+
 sudo startup.sh
 
 ```
