@@ -56,9 +56,13 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
-# Clone the repository
+# Clone the h2ogpt_rg repository
 echo "Cloning the h2ogpt_rg repository..."
 git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git
+
+# Clone the scaled-llm-deployment repository
+echo "Cloning the scaled-llm-deployment repository"
+git clone https://github.com/NickThompson42/scaled-llm-deployment.git
 
 # Navigate into the repository directory
 cd h2ogpt_rg
