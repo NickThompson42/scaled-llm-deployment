@@ -7,9 +7,9 @@ This repo provides the scripts and files necessary to scale a LLM quickly. The p
 1. Open the VM terminal once you've set it up and copy the code below into the CLI.
 
 ```bash
-wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main/shell-scripts/startup.sh -O shell-scripts/startup.sh
-sudo chmod +x shell-scripts/startup.sh
-sudo shell-scripts/startup.sh
+wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main/shell-scripts/startup.sh -O $HOME/shell-scripts/startup.sh
+sudo chmod +x $HOME/shell-scripts/startup.sh
+sudo $HOME/shell-scripts/startup.sh
 
 ```
 2. 
