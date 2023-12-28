@@ -8,7 +8,7 @@ This repo provides the scripts and files necessary to scale a LLM quickly. The p
 
 ```bash
 wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main/linux_baseline_install.sh -O linux_baseline_install.sh
-chmod +x linux_baseline_install.sh
-sudo ./linux_baseline_install.sh
+chmod +x shell-scripts/startup.sh
+sudo ./shell-scripts/startup.sh
 ```
 2. 
