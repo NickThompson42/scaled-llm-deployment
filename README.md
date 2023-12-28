@@ -11,7 +11,7 @@ wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main
 
 sudo chmod +x startup.sh
 
-sudo startup.sh
+sudo ./startup.sh
 
 ```
 2. 
