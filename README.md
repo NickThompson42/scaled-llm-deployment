@@ -14,4 +14,4 @@ sudo chmod +x startup.sh
 sudo ./startup.sh
 
 ```
-2. 
+2. Once you reboot the computer, enter `docker_startup` into the command line.
