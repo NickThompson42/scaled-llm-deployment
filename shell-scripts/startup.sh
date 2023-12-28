@@ -79,8 +79,8 @@ echo "Appending docker_startup function to $USER_HOME/.bashrc_functions..."
 cat << EOF >> "$USER_HOME/.bashrc_functions"
 function docker_startup(){
     # make run_docker_compose executable
-    chmod +x $USER_HOME/shell-scripts/run_docker_compose.sh
-    $USER_HOME/shell-scripts/run_docker_compose.sh
+    chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
+    $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
 }
 EOF
 
