@@ -94,6 +94,7 @@ function baseline(){
    sleep 3
    clear
 }
+EOF
 
 # Source the ~/.bashrc_functions in the user's .bashrc if it's not already
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
