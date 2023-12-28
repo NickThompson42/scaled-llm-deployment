@@ -6,6 +6,14 @@ if [ "$(id -u)" != "0" ]; then
    exit 1
 fi
 
+# Find the home directory of the user who invoked sudo
+if [ -n "$SUDO_USER" ]; then
+    USER_HOME=$(getent passwd "$SUDO_USER" | cut -d: -f6)
+else
+    echo "Could not determine the home directory of the original user." 1>&2
+    exit 1
+fi
+
 # Update package list and upgrade the system
 echo "Updating and upgrading the system..."
 sudo apt-get update && sudo apt-get upgrade -y
@@ -55,10 +63,37 @@ git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git
 # Navigate into the repository directory
 cd h2ogpt_rg
 
-echo "Installation complete. Please log out and log back in to apply the changes."
+## Check if the ~/.bashrc_functions file exists and create it if it doesn't
+if [ ! -f "$USER_HOME/.bashrc_functions" ]; then
+    echo "Creating $USER_HOME/.bashrc_functions..."
+    touch "$USER_HOME/.bashrc_functions"
+    chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc_functions"
+fi
+
+# Append the docker_startup function to the ~/.bashrc_functions
+echo "Appending docker_startup function to $USER_HOME/.bashrc_functions..."
+cat << EOF >> "$USER_HOME/.bashrc_functions"
+function docker_startup(){
+    # make run_docker_compose executable
+    chmod +x $USER_HOME/shell-scripts/run_docker_compose.sh
+    $USER_HOME/shell-scripts/run_docker_compose.sh
+}
+EOF
+
+# Source the ~/.bashrc_functions in the user's .bashrc if it's not already
+if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
+    echo "Sourcing $USER_HOME/.bashrc_functions in $USER_HOME/.bashrc..."
+    echo "source $USER_HOME/.bashrc_functions" >> "$USER_HOME/.bashrc"
+    chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
+fi
+
+echo -e "Installation complete."
+echo -e "After reboot, run 'docker_startup' to initialize the docker container for the LLM."
+echo -e "Please log out and log back in to apply the changes."
 
 # Optional: Reboot the system
 read -p "Do you want to reboot now? (y/n) " -n 1 -r
+echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
    sudo reboot
