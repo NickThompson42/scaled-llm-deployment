@@ -76,10 +76,11 @@ source "$USER_HOME/.bashrc"
 # sudo modprobe nvidia_modeset
 
 # Bypassing checks, going straight for the reboot option
-echo "Installation complete. A reboot is recommended to ensure all changes take effect."
-read -p "Do you want to reboot now? (y/n) " -n 1 -r
-echo    # (optional) move to a new line
-if [[ $REPLY =~ ^[Yy]$ ]]
-then
-    sudo reboot
-fi
+echo "Installation complete and the VM will not reboot."
+sleep 5
+# read -p "Do you want to reboot now? (y/n) " -n 1 -r
+# echo    # (optional) move to a new line
+# if [[ $REPLY =~ ^[Yy]$ ]]
+# then
+sudo reboot # indent if you add the request for reboot back in.
+# fi
