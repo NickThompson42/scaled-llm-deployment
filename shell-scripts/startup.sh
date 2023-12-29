@@ -94,68 +94,40 @@ echo -e ">>>> After reboot, run 'docker_startup' to initialize the docker contai
 echo -e " "
 echo -e ">>>>> Please log out and log back in to apply the changes."
 
-
 # Install NVIDIA Container Toolkit for Docker to access GPUs
 echo "Installing NVIDIA Container Toolkit..."
-distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
-  && curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add - \
-  && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
-# At the end of your NVIDIA driver and CUDA Toolkit installation sections
-echo "Attempting to refresh the environment and load NVIDIA kernel modules..."
+# Install NVIDIA drivers and CUDA Toolkit without checking for specific GPU types
+echo "Installing general drivers and CUDA Toolkit..."
+sudo apt-get install -y nvidia-driver-latest
+sudo apt-get install -y cuda-toolkit-11-0
+
+# Add necessary environment variables to .bashrc
+echo "Configuring environment variables..."
+echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/cuda/lib64/" >> ~/.bashrc
+echo "export CUDA_HOME=/usr/local/cuda" >> ~/.bashrc
+echo "export PATH=\$PATH:/usr/local/cuda/bin/" >> ~/.bashrc
 
 # Source the profile files to reload environment variables
 source ~/.bashrc
 
-# Try to load the NVIDIA kernel modules manually (common module names included, but yours might differ)
+# Load NVIDIA kernel modules
+echo "Loading NVIDIA kernel modules..."
 sudo modprobe nvidia
 sudo modprobe nvidia_uvm
 sudo modprobe nvidia_drm
 sudo modprobe nvidia_modeset
 
-# Check if NVIDIA drivers are now recognized
-if nvidia-smi; then
-    echo "NVIDIA drivers are active."
-else
-    echo "NVIDIA drivers are not responding. A reboot is recommended to ensure all changes take effect."
-fi
-
-# Detect GPU and install appropriate drivers and CUDA Toolkit
-GPU_TYPE=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)
-
-if [[ "$GPU_TYPE" == *"Tesla T4"* ]]; then
-    echo "Detected Tesla T4. Installing drivers and CUDA for Tesla T4..."
-    # Install drivers for Tesla T4
-    sudo apt -y install nvidia-utils-440-server
-    # Replace with installation commands for Tesla T4 CUDA Toolkit
-elif [[ "$GPU_TYPE" == *"A100"* ]]; then
-    echo "Detected A100 GPU. Installing drivers and CUDA for A100..."
-    # Install drivers for A100
-    sudo apt-get -y install nvidia-headless-535-server nvidia-fabricmanager-535 nvidia-utils-535-server
-    # Commands from developer recommendation for A100 CUDA installation
-    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
-    sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-    wget https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda-repo-ubuntu2004-12-1-local_12.1.0-530.30.02-1_amd64.deb
-    sudo dpkg -i cuda-repo-ubuntu2004-12-1-local_12.1.0-530.30.02-1_amd64.deb
-    sudo cp /var/cuda-repo-ubuntu2004-12-1-local/cuda-*-keyring.gpg /usr/share/keyrings/
-    sudo apt-get update
-    sudo apt-get -y install cuda
-    # Set up environment variables
-    echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/cuda/lib64/" >> ~/.bashrc
-    echo "export CUDA_HOME=/usr/local/cuda" >> ~/.bashrc
-    echo "export PATH=\$PATH:/usr/local/cuda/bin/" >> ~/.bashrc
-    source ~/.bashrc
-else
-    echo "Unsupported GPU type: $GPU_TYPE"
-    exit 1
-fi
-
-# Offer to reboot the system
+# Bypassing checks, going straight for the reboot option
+echo "Installation complete. A reboot is recommended to ensure all changes take effect."
 read -p "Do you want to reboot now? (y/n) " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
 then
-   sudo reboot
+    sudo reboot
 fi
