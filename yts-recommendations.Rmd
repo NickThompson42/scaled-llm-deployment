@@ -1,6 +1,8 @@
 ---
 title: "Y.T.'s Fixes"
-output: html_notebook
+output:
+  pdf_document: default
+  html_notebook: default
 ---
 
 Alright, my tech-savvy friend, let's break this down into manageable pieces to tackle the issues and uncertainties you're facing.
