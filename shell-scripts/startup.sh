@@ -79,7 +79,10 @@ EOF
 
 # Ensure the .bashrc sources the functions file
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
-    echo "source $USER_HOME/.bashrc_functions" >> "$USER_HOME/.bashrc"
+    cat << EOF >> "$USER_HOME/.bashrc"
+# Custom functions for enhanced bash experience
+source \$HOME/.bashrc_functions
+EOF
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
 fi
 
