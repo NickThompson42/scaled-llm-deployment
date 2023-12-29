@@ -13,6 +13,7 @@ wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main
 ```bash
 sudo chmod +x startup.sh
 sudo ./startup.sh
+
 ```
 
 2. Once you reboot the computer, enter `docker_startup` into the command line.
