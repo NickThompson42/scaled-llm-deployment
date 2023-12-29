@@ -25,6 +25,49 @@ sudo apt autoremove -y
 # Install necessary base packages
 sudo apt-get install -y git emacs nano vim curl wget software-properties-common pandoc apt-transport-https ca-certificates
 
+# Clone the necessary repositories
+echo "Cloning the repositories..."
+git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git $USER_HOME/h2ogpt_rg
+git clone https://github.com/NickThompson42/scaled-llm-deployment.git $USER_HOME/scaled-llm-deployment
+
+# Set up bash functions for the user
+echo "Setting up bash functions for user..."
+
+# Create the ~/.bashrc_functions file if it doesn't exist
+if [ ! -f "$USER_HOME/.bashrc_functions" ]; then
+    touch "$USER_HOME/.bashrc_functions"
+    chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc_functions"
+fi
+
+# Append the docker_startup function to the ~/.bashrc_functions
+cat << EOF >> "$USER_HOME/.bashrc_functions"
+function docker_startup(){
+    # make run_docker_compose executable and run it
+    sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
+    sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
+}
+
+function baseline(){
+   # source the needed functions
+   source $USER_HOME/.bashrc_functions
+   # change dir to h2ogpt_rg
+   cd $USER_HOME/h2ogpt_rg
+   ls
+   echo "Verify the files exist in h2ogpt_rg"
+   sleep 10
+   echo "Immediately after this message, use the 'docker_startup' command."
+}
+EOF
+
+# Ensure the .bashrc sources the functions file
+if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
+    cat << EOF >> "$USER_HOME/.bashrc"
+# Custom functions for enhanced bash experience
+source \$HOME/.bashrc_functions
+EOF
+    chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
+fi
+
 # Install Docker
 echo "Installing Docker..."
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -59,6 +102,9 @@ sudo dpkg -i cuda-repo-ubuntu2004-12-3-local_12.3.0-545.23.06-1_amd64.deb
 sudo cp /var/cuda-repo-ubuntu2004-12-3-local/cuda-*-keyring.gpg /usr/share/keyrings/
 sudo apt-get update
 sudo apt-get -y install cuda-toolkit-12-3
+
+# Install nvtop for monitoring
+sud apt install nvtop -y
 
 # Add necessary environment variables to .bashrc
 echo "Configuring environment variables..."
