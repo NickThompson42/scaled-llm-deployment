@@ -19,6 +19,13 @@ echo "Starting system update and package installation..."
 # Update package list and upgrade the system
 sudo apt-get update && sudo apt-get upgrade -y
 
+# Remove duplicate entries for Docker repository
+sudo sed -i '/download.docker.com\/linux\/ubuntu/d' /etc/apt/sources.list
+sudo apt-get update
+
+# Clean up unnecessary packages
+sudo apt autoremove -y
+
 # Install necessary base packages
 sudo apt-get install -y git emacs nano vim curl wget software-properties-common pandoc apt-transport-https ca-certificates
 
@@ -42,6 +49,25 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
   && curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
+
+# At the end of your NVIDIA driver and CUDA Toolkit installation sections
+echo "Attempting to refresh the environment and load NVIDIA kernel modules..."
+
+# Source the profile files to reload environment variables
+source ~/.bashrc
+
+# Try to load the NVIDIA kernel modules manually (common module names included, but yours might differ)
+sudo modprobe nvidia
+sudo modprobe nvidia_uvm
+sudo modprobe nvidia_drm
+sudo modprobe nvidia_modeset
+
+# Check if NVIDIA drivers are now recognized
+if nvidia-smi; then
+    echo "NVIDIA drivers are active."
+else
+    echo "NVIDIA drivers are not responding. A reboot is recommended to ensure all changes take effect."
+fi
 
 # Detect GPU and install appropriate drivers and CUDA Toolkit
 GPU_TYPE=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)
