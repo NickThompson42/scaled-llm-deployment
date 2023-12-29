@@ -43,6 +43,36 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
+# Detect GPU and install appropriate drivers and CUDA Toolkit
+GPU_TYPE=$(nvidia-smi --query-gpu=gpu_name --format=csv,noheader)
+
+if [[ "$GPU_TYPE" == *"Tesla T4"* ]]; then
+    echo "Detected Tesla T4. Installing drivers and CUDA for Tesla T4..."
+    # Install drivers for Tesla T4
+    sudo apt -y install nvidia-utils-440-server
+    # Replace with installation commands for Tesla T4 CUDA Toolkit
+elif [[ "$GPU_TYPE" == *"A100"* ]]; then
+    echo "Detected A100 GPU. Installing drivers and CUDA for A100..."
+    # Install drivers for A100
+    sudo apt-get -y install nvidia-headless-535-server nvidia-fabricmanager-535 nvidia-utils-535-server
+    # Commands from developer recommendation for A100 CUDA installation
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+    sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+    wget https://developer.download.nvidia.com/compute/cuda/12.1.0/local_installers/cuda-repo-ubuntu2004-12-1-local_12.1.0-530.30.02-1_amd64.deb
+    sudo dpkg -i cuda-repo-ubuntu2004-12-1-local_12.1.0-530.30.02-1_amd64.deb
+    sudo cp /var/cuda-repo-ubuntu2004-12-1-local/cuda-*-keyring.gpg /usr/share/keyrings/
+    sudo apt-get update
+    sudo apt-get -y install cuda
+    # Set up environment variables
+    echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:/usr/local/cuda/lib64/" >> ~/.bashrc
+    echo "export CUDA_HOME=/usr/local/cuda" >> ~/.bashrc
+    echo "export PATH=\$PATH:/usr/local/cuda/bin/" >> ~/.bashrc
+    source ~/.bashrc
+else
+    echo "Unsupported GPU type: $GPU_TYPE"
+    exit 1
+fi
+
 # Clone the necessary repositories
 echo "Cloning the repositories..."
 git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git $USER_HOME/h2ogpt_rg
