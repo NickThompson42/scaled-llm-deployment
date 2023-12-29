@@ -72,7 +72,8 @@ function baseline(){
    cd $USER_HOME/h2ogpt_rg
    ls
    echo "Verify the files exist in h2ogpt_rg"
-   sleep 3
+   sleep 10
+   echo "Immediately after this message, use the 'docker_startup' command."
    clear
 }
 EOF
