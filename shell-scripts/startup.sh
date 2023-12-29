@@ -14,39 +14,26 @@ else
     exit 1
 fi
 
+echo "Starting system update and package installation..."
+
 # Update package list and upgrade the system
-echo "Updating and upgrading the system..."
 sudo apt-get update && sudo apt-get upgrade -y
 
 # Install necessary base packages
-echo "Installing base packages..."
 sudo apt-get install -y git emacs nano vim curl wget software-properties-common pandoc apt-transport-https ca-certificates
-
-# Add Docker’s official GPG key
-echo "Adding Docker's official GPG key..."
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-
-# Add the Docker repository
-echo "Adding the Docker repository..."
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-
-# Update package database with Docker packages from the newly added repo
-echo "Updating package database..."
-sudo apt-get update
 
 # Install Docker
 echo "Installing Docker..."
-sudo apt-get install -y docker-ce
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
 
-# Check if the docker group exists, create if it doesn't, and add the current user to it
-echo "Adding current user to the docker group..."
-sudo getent group docker || sudo groupadd docker
-sudo usermod -aG docker ${USER}
+# Ensure the user is in the Docker group
+sudo usermod -aG docker $SUDO_USER
 
-# Enable and start Docker
-echo "Enabling and starting Docker..."
-sudo systemctl enable docker
-sudo systemctl start docker
+# Install Docker Compose
+echo "Installing Docker Compose..."
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
 
 # Install NVIDIA Container Toolkit for Docker to access GPUs
 echo "Installing NVIDIA Container Toolkit..."
@@ -56,39 +43,33 @@ distribution=$(. /etc/os-release;echo $ID$VERSION_ID) \
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
-# Clone the h2ogpt_rg repository
-echo "Cloning the h2ogpt_rg repository..."
-git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git
+# Clone the necessary repositories
+echo "Cloning the repositories..."
+git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git $USER_HOME/h2ogpt_rg
+git clone https://github.com/NickThompson42/scaled-llm-deployment.git $USER_HOME/scaled-llm-deployment
 
-# Clone the scaled-llm-deployment repository
-echo "Cloning the scaled-llm-deployment repository"
-git clone https://github.com/NickThompson42/scaled-llm-deployment.git
+# Set up bash functions for the user
+echo "Setting up bash functions for user..."
 
-# Navigate into the repository directory
-cd h2ogpt_rg
-
-## Check if the ~/.bashrc_functions file exists and create it if it doesn't
+# Create the ~/.bashrc_functions file if it doesn't exist
 if [ ! -f "$USER_HOME/.bashrc_functions" ]; then
-    echo "Creating $USER_HOME/.bashrc_functions..."
     touch "$USER_HOME/.bashrc_functions"
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc_functions"
 fi
 
 # Append the docker_startup function to the ~/.bashrc_functions
-echo "Appending docker_startup function to $USER_HOME/.bashrc_functions..."
 cat << EOF >> "$USER_HOME/.bashrc_functions"
 function docker_startup(){
-    # make run_docker_compose executable
+    # make run_docker_compose executable and run it
     sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
     sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
 }
-EOF
 
 function baseline(){
    # source the needed functions
-   source ~/.bashrc_functions
+   source $USER_HOME/.bashrc_functions
    # change dir to h2ogpt_rg
-   cd $HOME/h2ogpt_rg
+   cd $USER_HOME/h2ogpt_rg
    ls
    echo "Verify the files exist in h2ogpt_rg"
    sleep 3
@@ -96,13 +77,13 @@ function baseline(){
 }
 EOF
 
-# Source the ~/.bashrc_functions in the user's .bashrc if it's not already
+# Ensure the .bashrc sources the functions file
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
-    echo "Sourcing $USER_HOME/.bashrc_functions in $USER_HOME/.bashrc..."
     echo "source $USER_HOME/.bashrc_functions" >> "$USER_HOME/.bashrc"
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
 fi
 
+echo -e " "
 echo -e ">> Installation complete."
 echo -e " "
 echo -e ">>> After reboot, use command 'baseline'."
@@ -111,7 +92,7 @@ echo -e ">>>> After reboot, run 'docker_startup' to initialize the docker contai
 echo -e " "
 echo -e ">>>>> Please log out and log back in to apply the changes."
 
-# Optional: Reboot the system
+# Offer to reboot the system
 read -p "Do you want to reboot now? (y/n) " -n 1 -r
 echo    # (optional) move to a new line
 if [[ $REPLY =~ ^[Yy]$ ]]
