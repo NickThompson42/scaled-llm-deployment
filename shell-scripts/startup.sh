@@ -74,7 +74,6 @@ function baseline(){
    echo "Verify the files exist in h2ogpt_rg"
    sleep 10
    echo "Immediately after this message, use the 'docker_startup' command."
-   clear
 }
 EOF
 
