@@ -60,6 +60,7 @@ function baseline(){
 EOF
 
 cat << EOF >> "$USER_HOME/.bashrc"
+
 read -p "Would you like to run 'docker_startup'? [y/n] " answer && [[ "$answer" == [Yy] ]] && docker_startup
 EOF
 
@@ -85,6 +86,47 @@ echo "Installing Docker Compose..."
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 
+######################################
+## DOES NOT WORK BUT GOOD REFERENCE ##
+######################################
+
+# # Install NVIDIA Container Toolkit for Docker to access GPUs
+# echo "Installing NVIDIA Container Toolkit..."
+# distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+# curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+# curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+# sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+# sudo systemctl restart docker
+
+# # Install the NVIDIA driver 440 for the server
+# echo "Installing NVIDIA driver 440..."
+# sudo apt-get install -y nvidia-driver-440-server
+
+# # Install CUDA Toolkit 12.3
+# echo "Installing CUDA Toolkit 12.3..."
+# wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+# sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+# wget https://developer.download.nvidia.com/compute/cuda/12.3.0/local_installers/cuda-repo-ubuntu2004-12-3-local_12.3.0-545.23.06-1_amd64.deb
+# sudo dpkg -i cuda-repo-ubuntu2004-12-3-local_12.3.0-545.23.06-1_amd64.deb
+# sudo cp /var/cuda-repo-ubuntu2004-12-3-local/cuda-*-keyring.gpg /usr/share/keyrings/
+# sudo apt-get update
+# sudo apt-get -y install cuda-toolkit-12-2
+
+# # Install nvtop for monitoring
+# sud apt install nvtop -y
+
+###################################
+## END, NEXT SECTION REPLACES IT ##
+###################################
+
+######################
+## REPLACEMENT CODE ##
+######################
+
+# Remove the old NVIDIA driver installation line
+# echo "Installing NVIDIA driver 440..."
+# sudo apt-get install -y nvidia-driver-440-server
+
 # Install NVIDIA Container Toolkit for Docker to access GPUs
 echo "Installing NVIDIA Container Toolkit..."
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
@@ -93,22 +135,35 @@ curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.li
 sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
-# Install the NVIDIA driver 440 for the server
-echo "Installing NVIDIA driver 440..."
-sudo apt-get install -y nvidia-driver-440-server
-
-# Install CUDA Toolkit 12.3
-echo "Installing CUDA Toolkit 12.3..."
+# Install CUDA Toolkit 12.3.2 and NVIDIA Drivers
+echo "Installing CUDA Toolkit 12.3.2 and NVIDIA Drivers..."
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
 sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
-wget https://developer.download.nvidia.com/compute/cuda/12.3.0/local_installers/cuda-repo-ubuntu2004-12-3-local_12.3.0-545.23.06-1_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu2004-12-3-local_12.3.0-545.23.06-1_amd64.deb
+wget https://developer.download.nvidia.com/compute/cuda/12.3.2/local_installers/cuda-repo-ubuntu2004-12-3-local_12.3.2-545.23.08-1_amd64.deb
+sudo dpkg -i cuda-repo-ubuntu2004-12-3-local_12.3.2-545.23.08-1_amd64.deb
 sudo cp /var/cuda-repo-ubuntu2004-12-3-local/cuda-*-keyring.gpg /usr/share/keyrings/
 sudo apt-get update
+
+# Install the legacy kernel module flavor NVIDIA driver
+echo "Installing the legacy kernel module flavor NVIDIA driver..."
+sudo apt-get install -y cuda-drivers
+
+# If you prefer the open kernel module flavor, use the following commands instead:
+# echo "Installing the open kernel module flavor NVIDIA driver..."
+# sudo apt-get install -y nvidia-kernel-open-545
+# sudo apt-get install -y cuda-drivers-545
+
+# Install CUDA Toolkit
+echo "Installing CUDA Toolkit..."
 sudo apt-get -y install cuda-toolkit-12-3
 
 # Install nvtop for monitoring
-sud apt install nvtop -y
+echo "Installing nvtop for monitoring..."
+sudo apt install nvtop -y
+
+#########
+## END ##
+#########
 
 # Add necessary environment variables to .bashrc
 echo "Configuring environment variables..."
