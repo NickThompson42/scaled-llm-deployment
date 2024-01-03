@@ -69,8 +69,8 @@ function baseline(){
 EOF
 
 cat << EOF >> "$USER_HOME/.bashrc"
-
-read -p "Would you like to run 'docker_startup'? [y/n] " answer && [[ "$answer" == [Yy] ]] && docker_startup
+# Change directory and run docker_startup at the start of every session
+cd $USER_HOME/h2ogpt_rg && docker_startup
 EOF
 
 # Ensure the .bashrc sources the functions file
