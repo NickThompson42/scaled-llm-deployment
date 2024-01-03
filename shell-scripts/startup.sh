@@ -115,6 +115,10 @@ sudo chmod +x /usr/local/bin/docker-compose
 # # Install nvtop for monitoring
 # sud apt install nvtop -y
 
+# Remove the old NVIDIA driver installation line
+# echo "Installing NVIDIA driver 440..."
+# sudo apt-get install -y nvidia-driver-440-server
+
 ###################################
 ## END, NEXT SECTION REPLACES IT ##
 ###################################
@@ -123,16 +127,12 @@ sudo chmod +x /usr/local/bin/docker-compose
 ## REPLACEMENT CODE ##
 ######################
 
-# Remove the old NVIDIA driver installation line
-# echo "Installing NVIDIA driver 440..."
-# sudo apt-get install -y nvidia-driver-440-server
-
 # Install NVIDIA Container Toolkit for Docker to access GPUs
 echo "Installing NVIDIA Container Toolkit..."
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
 curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
-sudo apt-get update && sudo apt-get install -y nvidia-container-toolkit
+sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y nvidia-container-toolkit
 sudo systemctl restart docker
 
 # Install CUDA Toolkit 12.3.2 and NVIDIA Drivers
@@ -144,18 +144,14 @@ sudo dpkg -i cuda-repo-ubuntu2004-12-3-local_12.3.2-545.23.08-1_amd64.deb
 sudo cp /var/cuda-repo-ubuntu2004-12-3-local/cuda-*-keyring.gpg /usr/share/keyrings/
 sudo apt-get update
 
-# Install the legacy kernel module flavor NVIDIA driver
-echo "Installing the legacy kernel module flavor NVIDIA driver..."
-sudo apt-get install -y cuda-drivers
-
-# If you prefer the open kernel module flavor, use the following commands instead:
-# echo "Installing the open kernel module flavor NVIDIA driver..."
-# sudo apt-get install -y nvidia-kernel-open-545
-# sudo apt-get install -y cuda-drivers-545
+# Pre-configure selections and Install the NVIDIA driver
+echo "Pre-configuring and Installing the NVIDIA driver..."
+echo "nvidia-driver-450-server nvidia-driver-450-server/license-type select Accept" | sudo debconf-set-selections
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y cuda-drivers
 
 # Install CUDA Toolkit
 echo "Installing CUDA Toolkit..."
-sudo apt-get -y install cuda-toolkit-12-3
+sudo DEBIAN_FRONTEND=noninteractive apt-get -y install cuda-toolkit-12-3
 
 # Install nvtop for monitoring
 echo "Installing nvtop for monitoring..."
