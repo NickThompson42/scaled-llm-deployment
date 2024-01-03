@@ -16,8 +16,17 @@ fi
 
 echo "Starting system update and package installation..."
 
-# Update package list and upgrade the system
-sudo apt-get update && sudo apt-get upgrade -y
+# Pre-configure selections for openssh-server and other packages
+echo "openssh-server openssh-server/sshd_config_keep boolean true" | sudo debconf-set-selections
+# Add similar lines for any other packages that require pre-configuration
+
+# Update package list and upgrade the system non-interactively
+sudo DEBIAN_FRONTEND=noninteractive apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get upgrade -yq
+
+# echo "Starting system update and package installation..."
+
+# # Update package list and upgrade the system
+# sudo apt-get update && sudo apt-get upgrade -y
 
 # Clean up unnecessary packages
 sudo apt autoremove -y
