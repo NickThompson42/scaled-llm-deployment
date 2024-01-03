@@ -59,6 +59,10 @@ function baseline(){
 }
 EOF
 
+cat << EOF >> "$USER_HOME/.bashrc"
+read -p "Would you like to run 'docker_startup'? [y/n] " answer && [[ "$answer" == [Yy] ]] && docker_startup
+EOF
+
 # Ensure the .bashrc sources the functions file
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
     cat << EOF >> "$USER_HOME/.bashrc"
@@ -122,7 +126,7 @@ source "$USER_HOME/.bashrc"
 # sudo modprobe nvidia_modeset
 
 # Bypassing checks, going straight for the reboot option
-echo "Installation complete and the VM will not reboot."
+echo "Installation complete and the VM will now reboot."
 sleep 5
 # read -p "Do you want to reboot now? (y/n) " -n 1 -r
 # echo    # (optional) move to a new line
