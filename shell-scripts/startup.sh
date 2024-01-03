@@ -68,11 +68,6 @@ function baseline(){
 }
 EOF
 
-cat << EOF >> "$USER_HOME/.bashrc"
-# Change directory and run docker_startup at the start of every session
-cd $USER_HOME/h2ogpt_rg && docker_startup
-EOF
-
 # Ensure the .bashrc sources the functions file
 if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
     cat << EOF >> "$USER_HOME/.bashrc"
@@ -81,6 +76,12 @@ source \$HOME/.bashrc_functions
 EOF
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc"
 fi
+
+cat << EOF >> "$USER_HOME/.bashrc"
+# Change directory and run docker_startup at the start of every session
+cd $USER_HOME/h2ogpt_rg && docker_startup
+EOF
+
 
 # Install Docker
 echo "Installing Docker..."
