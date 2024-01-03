@@ -15,4 +15,4 @@ wget https://raw.githubusercontent.com/NickThompson42/scaled-llm-deployment/main
 ```
 
 
-2. Once you reboot the computer, enter `docker_startup` into the command line.
+2. Once you reboot the computer it will automatically start the docker.
