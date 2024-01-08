@@ -105,16 +105,6 @@ get_installed_cuda_version() {
 # Define the required CUDA version
 REQUIRED_CUDA_VERSION="12.3.2"
 
-# Check if installed CUDA version is less than the required version
-if [ "$INSTALLED_CUDA_VERSION" = "none" ] || version_gt $REQUIRED_CUDA_VERSION $INSTALLED_CUDA_VERSION; then
-    echo "Required CUDA version is not installed. Installing CUDA Toolkit $REQUIRED_CUDA_VERSION..."
-    # Add here the commands to install the required CUDA version
-    # (e.g., adding repositories, setting up keys, apt-get install commands)
-else
-    echo "CUDA Toolkit $REQUIRED_CUDA_VERSION is already installed."
-fi
-
-
 INSTALLED_CUDA_VERSION=$(get_installed_cuda_version)
 if [ "$INSTALLED_CUDA_VERSION" != "none" ]; then
     CUDA_PATH_LINE="export PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/bin:\$PATH"
@@ -127,6 +117,15 @@ if [ "$INSTALLED_CUDA_VERSION" != "none" ]; then
     fi
     # [ ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
     # [ ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
+fi
+
+# Check if installed CUDA version is less than the required version
+if [ "$INSTALLED_CUDA_VERSION" = "none" ] || version_gt $REQUIRED_CUDA_VERSION $INSTALLED_CUDA_VERSION; then
+    echo "Required CUDA version is not installed. Installing CUDA Toolkit $REQUIRED_CUDA_VERSION..."
+    # Add here the commands to install the required CUDA version
+    # (e.g., adding repositories, setting up keys, apt-get install commands)
+else
+    echo "CUDA Toolkit $REQUIRED_CUDA_VERSION is already installed."
 fi
 
 # Finalizing
