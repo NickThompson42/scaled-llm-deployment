@@ -1,4 +1,5 @@
 #!/bin/bash
+# version 1.1.0
 
 # Ensure the script is run as root
 if [ "$(id -u)" != "0" ]; then
