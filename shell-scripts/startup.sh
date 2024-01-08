@@ -43,19 +43,6 @@ for pkg in $REQUIRED_PKGS; do
     fi
 done
 
-####################################
-#### LAST WORKING FRESH INSTALL ###
-####################################
-
-# # Clone the necessary repositories
-# echo "Cloning the repositories..."
-# git clone https://github.com/Royce-Geospatial-Consultants/h2ogpt_rg.git $USER_HOME/h2ogpt_rg
-# git clone https://github.com/NickThompson42/scaled-llm-deployment.git $USER_HOME/scaled-llm-deployment
-
-############
-### END ####
-############
-
 ############
 ### NEW ####
 ############
@@ -72,11 +59,6 @@ if [ ! -d "$USER_HOME/scaled-llm-deployment" ]; then
 else
     echo "scaled-llm-deployment already cloned."
 fi
-
-############
-### END ####
-############
-
 
 # Set up bash functions for the user
 echo "Setting up bash functions for user..."
@@ -164,23 +146,6 @@ EOF
 ################
 #### DOCKER ####
 ################
-
-# <<<<< OLD DOCKER >>>>>
-# # Install Docker
-# echo "Installing Docker..."
-# curl -fsSL https://get.docker.com -o get-docker.sh
-# sudo sh get-docker.sh
-
-# # Ensure the user is in the Docker group
-# sudo usermod -aG docker $SUDO_USER
-
-# # Install Docker Compose
-# echo "Installing Docker Compose..."
-# sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-# sudo chmod +x /usr/local/bin/docker-compose
-# <<<<< END OLD DOCKER >>>>>
-
-# >>>>> NEW DOCKER <<<<<
 
 # Check for Docker and install if not found
 if ! type "docker" > /dev/null; then
@@ -321,15 +286,6 @@ sudo apt install nvtop -y
 ####################################
 #### CONFIGURATINO AND EVN VARS ####
 ####################################
-
-# <<<<< OLD CONFIG AND ENV VARS >>>>>
-# Add necessary environment variables to .bashrc
-# echo "Configuring environment variables..."
-# echo "export PATH=/usr/local/cuda-12.3/bin:$PATH" >> "$USER_HOME/.bashrc"
-# echo "export LD_LIBRARY_PATH=/usr/local/cuda-12.3/lib64:$LD_LIBRARY_PATH" >> "$USER_HOME/.bashrc"
-
-# <<<<< END OLD CONFIG AND ENV VARS >>>>>
-
 # >>>>> NEW CONFIG AND ENV VARS <<<<<
 
 # Get the installed CUDA version
