@@ -102,12 +102,31 @@ get_installed_cuda_version() {
     type "nvcc" > /dev/null && nvcc --version | grep "release" | awk '{print $6}' | cut -c2- || echo "none"
 }
 
+# Define the required CUDA version
+REQUIRED_CUDA_VERSION="12.3.2"
+
+# Check if installed CUDA version is less than the required version
+if [ "$INSTALLED_CUDA_VERSION" = "none" ] || version_gt $REQUIRED_CUDA_VERSION $INSTALLED_CUDA_VERSION; then
+    echo "Required CUDA version is not installed. Installing CUDA Toolkit $REQUIRED_CUDA_VERSION..."
+    # Add here the commands to install the required CUDA version
+    # (e.g., adding repositories, setting up keys, apt-get install commands)
+else
+    echo "CUDA Toolkit $REQUIRED_CUDA_VERSION is already installed."
+fi
+
+
 INSTALLED_CUDA_VERSION=$(get_installed_cuda_version)
 if [ "$INSTALLED_CUDA_VERSION" != "none" ]; then
     CUDA_PATH_LINE="export PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/bin:\$PATH"
     CUDA_LD_LIBRARY_LINE="export LD_LIBRARY_PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/lib64:\$LD_LIBRARY_PATH"
-    [ ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
-    [ ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
+    if ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc"; then
+    echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
+    fi
+    if ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc"; then
+        echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
+    fi
+    # [ ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
+    # [ ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
 fi
 
 # Finalizing
