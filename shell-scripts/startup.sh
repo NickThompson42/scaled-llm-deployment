@@ -87,27 +87,23 @@ if [ ! -f "$USER_HOME/.bashrc_functions" ]; then
     chown "$SUDO_USER":"$SUDO_USER" "$USER_HOME/.bashrc_functions"
 fi
 
-####################################
-#### LAST WORKING FRESH INSTALL ###
-####################################
-
-# Append the docker_startup function to the ~/.bashrc_functions
-
+# Append the docker_startup function to the ~/.bashrc_functions if not already there
 if ! grep -q "function docker_startup()" "$USER_HOME/.bashrc_functions"; then
     cat << EOF >> "$USER_HOME/.bashrc_functions"
 function docker_startup(){
-    # make run_docker_compose executable and run it
+    # Make run_docker_compose executable and run it
     sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
     sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
 }
 EOF
 fi
 
+# Append the baseline function to the ~/.bashrc_functions
 cat << EOF >> "$USER_HOME/.bashrc_functions"
 function baseline(){
-   # source the needed functions
+   # Source the needed functions
    source $USER_HOME/.bashrc_functions
-   # change dir to h2ogpt_rg
+   # Change dir to h2ogpt_rg
    cd $USER_HOME/h2ogpt_rg
    ls
    echo "Verify the files exist in h2ogpt_rg"
@@ -115,10 +111,6 @@ function baseline(){
    echo "Immediately after this message, use the 'docker_startup' command."
 }
 EOF
-
-# Define docker_startup function if not already defined
-if ! grep -q "docker_startup" "$USER_HOME/.bashrc_functions"; then
-    cat << EOF >> "$
 
 ############
 ### END ####
@@ -128,7 +120,7 @@ if ! grep -q "docker_startup" "$USER_HOME/.bashrc_functions"; then
 #### NEW BASH STARTUP ####
 ##########################
 
-# Change in .bashrc to prevent docker_startup from running on every shell start
+# Append to .bashrc to conditionally start docker containers on a new session
 cat << EOF >> "$USER_HOME/.bashrc"
 # Custom command to start docker containers if not already running
 function ensure_docker_containers_running(){
@@ -144,6 +136,11 @@ function ensure_docker_containers_running(){
 # Change directory and conditionally run docker_startup at the start of every session
 cd $USER_HOME/h2ogpt_rg && docker pull gcr.io/vorvan/h2oai/h2ogpt-runtime:0.1.0 && ensure_docker_containers_running
 EOF
+
+# Ensure the .bashrc sources the functions file
+if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
+    echo "source \$HOME/.bashrc_functions" >> "$USER_HOME/.bashrc"
+fi
 
 #############
 #### END ####
