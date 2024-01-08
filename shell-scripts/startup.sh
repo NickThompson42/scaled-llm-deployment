@@ -61,12 +61,30 @@ if ! grep -q ".bashrc_functions" "$USER_HOME/.bashrc"; then
     cat << EOF >> "$USER_HOME/.bashrc"
 source \$HOME/.bashrc_functions
 function ensure_docker_containers_running(){
-    CONTAINER_COUNT=\$(docker ps | wc -l)
-    [ "\$CONTAINER_COUNT" -eq 1 ] && docker_startup || echo "Docker containers already running."
+    CONTAINER_NAME="h2ogpt_rg_h2ogpt_1"
+
+    # Check if Docker is running
+    if ! type "docker" &> /dev/null; then
+        echo "Docker is not running or not installed."
+        return 1
+    fi
+
+    # Check if the specific container is running
+    if [ -z "\$(docker ps -q -f name=\$CONTAINER_NAME)" ]; then
+        if [ "\$(docker ps -aq -f status=exited -f name=\$CONTAINER_NAME)" ]; then
+            # Cleanup if the container exists but exited
+            docker rm \$CONTAINER_NAME || { echo "Failed to remove exited container"; return 1; }
+        fi
+        # Start the container as it's not running
+        docker_startup || { echo "Failed to start Docker containers"; return 1; }
+    else
+        echo "Docker containers already running."
+    fi
 }
 cd $USER_HOME/h2ogpt_rg && docker pull gcr.io/vorvan/h2oai/h2ogpt-runtime:0.1.0 && ensure_docker_containers_running
 EOF
 fi
+
 
 # Docker installation
 if ! type "docker" > /dev/null; then
@@ -106,27 +124,39 @@ get_installed_cuda_version() {
 REQUIRED_CUDA_VERSION="12.3.2"
 
 INSTALLED_CUDA_VERSION=$(get_installed_cuda_version)
-if [ "$INSTALLED_CUDA_VERSION" != "none" ]; then
-    CUDA_PATH_LINE="export PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/bin:\$PATH"
-    CUDA_LD_LIBRARY_LINE="export LD_LIBRARY_PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/lib64:\$LD_LIBRARY_PATH"
-    if ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc"; then
-    echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
-    fi
-    if ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc"; then
-        echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
-    fi
-    # [ ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
-    # [ ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc" ] && echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
-fi
 
 # Check if installed CUDA version is less than the required version
 if [ "$INSTALLED_CUDA_VERSION" = "none" ] || version_gt $REQUIRED_CUDA_VERSION $INSTALLED_CUDA_VERSION; then
     echo "Required CUDA version is not installed. Installing CUDA Toolkit $REQUIRED_CUDA_VERSION..."
-    # Add here the commands to install the required CUDA version
-    # (e.g., adding repositories, setting up keys, apt-get install commands)
+    # Download the CUDA repository pin
+    wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2004/x86_64/cuda-ubuntu2004.pin
+    sudo mv cuda-ubuntu2004.pin /etc/apt/preferences.d/cuda-repository-pin-600
+
+    # Download and install the CUDA repository package
+    wget https://developer.download.nvidia.com/compute/cuda/11.8.0/local_installers/cuda-repo-ubuntu2004-11-8-local_11.8.0-520.61.05-1_amd64.deb
+    sudo dpkg -i cuda-repo-ubuntu2004-11-8-local_11.8.0-520.61.05-1_amd64.deb
+
+    # Copy the CUDA keyring
+    sudo cp /var/cuda-repo-ubuntu2004-11-8-local/cuda-*-keyring.gpg /usr/share/keyrings/
+
+    # Update package lists and install CUDA
+    sudo apt-get update
+    sudo apt-get -y install cuda
 else
     echo "CUDA Toolkit $REQUIRED_CUDA_VERSION is already installed."
 fi
+
+if [ "$INSTALLED_CUDA_VERSION" != "none" ]; then
+    CUDA_PATH_LINE="export PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/bin:\$PATH"
+    CUDA_LD_LIBRARY_LINE="export LD_LIBRARY_PATH=/usr/local/cuda-$INSTALLED_CUDA_VERSION/lib64:\$LD_LIBRARY_PATH"
+    if ! grep -q "$CUDA_PATH_LINE" "$USER_HOME/.bashrc"; then
+        echo "$CUDA_PATH_LINE" >> "$USER_HOME/.bashrc"
+    fi
+    if ! grep -q "$CUDA_LD_LIBRARY_LINE" "$USER_HOME/.bashrc"; then
+        echo "$CUDA_LD_LIBRARY_LINE" >> "$USER_HOME/.bashrc"
+    fi
+fi
+
 
 # Finalizing
 echo "Installation complete. The VM will now reboot."
