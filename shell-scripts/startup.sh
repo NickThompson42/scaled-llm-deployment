@@ -91,25 +91,34 @@ fi
 #### LAST WORKING FRESH INSTALL ###
 ####################################
 
-# # Append the docker_startup function to the ~/.bashrc_functions
-# cat << EOF >> "$USER_HOME/.bashrc_functions"
-# function docker_startup(){
-#     # make run_docker_compose executable and run it
-#     sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
-#     sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
-# }
+# Append the docker_startup function to the ~/.bashrc_functions
 
-# function baseline(){
-#    # source the needed functions
-#    source $USER_HOME/.bashrc_functions
-#    # change dir to h2ogpt_rg
-#    cd $USER_HOME/h2ogpt_rg
-#    ls
-#    echo "Verify the files exist in h2ogpt_rg"
-#    sleep 10
-#    echo "Immediately after this message, use the 'docker_startup' command."
-# }
-# EOF
+if ! grep -q "function docker_startup()" "$USER_HOME/.bashrc_functions"; then
+    cat << EOF >> "$USER_HOME/.bashrc_functions"
+function docker_startup(){
+    # make run_docker_compose executable and run it
+    sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
+    sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
+}
+EOF
+fi
+
+cat << EOF >> "$USER_HOME/.bashrc_functions"
+function baseline(){
+   # source the needed functions
+   source $USER_HOME/.bashrc_functions
+   # change dir to h2ogpt_rg
+   cd $USER_HOME/h2ogpt_rg
+   ls
+   echo "Verify the files exist in h2ogpt_rg"
+   sleep 10
+   echo "Immediately after this message, use the 'docker_startup' command."
+}
+EOF
+
+# Define docker_startup function if not already defined
+if ! grep -q "docker_startup" "$USER_HOME/.bashrc_functions"; then
+    cat << EOF >> "$
 
 ############
 ### END ####
@@ -350,7 +359,6 @@ fi
 
 # Source the profile files to reload environment variables
 source "$USER_HOME/.bashrc"
-
 
 #############
 #### END ####
