@@ -39,6 +39,18 @@ fi
 if ! grep -q "docker_startup" "$USER_HOME/.bashrc_functions"; then
     cat << EOF >> "$USER_HOME/.bashrc_functions"
 function docker_startup(){
+    CONTAINER_NAME="h2ogpt_rg_h2ogpt_1"
+
+    # Check if the container already exists
+    if [ "$(docker ps -aq -f name=$CONTAINER_NAME)" ]; then
+        # Check if the container is running
+        if [ -z "$(docker ps -q -f name=$CONTAINER_NAME)" ]; then
+            # Remove the container as it exists but is not running
+            docker rm $CONTAINER_NAME
+        fi
+    fi
+
+    # Make the Docker Compose script executable and run it
     sudo chmod +x $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
     sudo $USER_HOME/scaled-llm-deployment/shell-scripts/run_docker_compose.sh
 }
